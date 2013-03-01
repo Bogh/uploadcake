@@ -37,7 +37,7 @@ class UploadPath extends UploadAppModel {
 	 * @access public
 	 * @return void
 	 */
-	public function beforeDelete() {
+	public function beforeDelete($cascade = true) {
 		$this->_delete = $this->field('path');
 	}
 
