@@ -76,4 +76,15 @@ class UploadHelper extends AppHelper {
         return Router::url($url, $full);
     }
 
+    public function editImage($field, $type = null) {
+        if (Hash::check($this->request->data, $field)) {
+            $value = Hash::extract($this->request->data, $field);
+            $value = array_pop($value);
+            if (!empty($value)) {
+                return $this->image($value, $type);
+            }
+        }
+        return '';
+    }
+
 }
