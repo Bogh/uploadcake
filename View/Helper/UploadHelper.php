@@ -21,7 +21,7 @@ class UploadHelper extends AppHelper {
      * @return string
      */
     public function link($title, $id, $name = null, $options = array(), $extra = array()) {
-        return $this->Html->link($title, $this->url($id, $name, true, false, $extra), $options);
+        return $this->Html->link($title, $this->uri($id, $name, true, false, $extra), $options);
     }
 
     /**
@@ -38,13 +38,13 @@ class UploadHelper extends AppHelper {
     public function image($id, $name = null, $options = array()) {
         if (isset($options['url'])) {
             if ($options['url'] === true) {
-                $options['url'] = $this->url($id, $name, true);
+                $options['url'] = $this->uri($id, $name, true);
             } elseif (is_int($options['url'])) {
-                $options['url'] = $this->url($options['url'], null, true);
+                $options['url'] = $this->uri($options['url'], null, true);
             }
         }
 
-        $image = $this->Html->image($this->url($id, $name, true), $options);
+        $image = $this->Html->image($this->uri($id, $name, true), $options);
         return  $image;
     }
 
@@ -58,7 +58,7 @@ class UploadHelper extends AppHelper {
      *
      * @return mixed Array daca $array e True, string daca e false
      */
-    public function url($id, $name = null, $array = false, $full = false, $extra = array()) {
+    public function uri($id, $name = null, $array = false, $full = false, $extra = array()) {
         $url = Hash::merge(array(
             'plugin' => 'upload',
             'controller' => 'uploads',

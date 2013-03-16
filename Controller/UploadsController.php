@@ -2,6 +2,14 @@
 
 class UploadsController extends UploadAppController {
 
+    public function beforeFilter() {
+        parent::beforeFilter();
+
+        if (isset($this->Auth)) {
+            $this->Auth->allow('index');
+        }
+    }
+
     /**
      * index
      *

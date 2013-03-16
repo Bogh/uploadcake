@@ -72,7 +72,7 @@ class UploadableBehavior extends ModelBehavior {
 	* @access public
 	* @return void
 	*/
-	public function setup($model, $config = array()) {
+	public function setup(Model $model, $config = array()) {
 		$defaults = array(
 			'keepOriginal' => true
 		);
@@ -102,7 +102,7 @@ class UploadableBehavior extends ModelBehavior {
 	* @access public
 	* @return void
 	*/
-	public function beforeSave($model) {
+	public function beforeSave(Model $model) {
 		foreach ($this->settings[$model->alias] as $field => $settings) {
 			if (!isset($model->data[$model->alias][$field])
 				|| !is_array($model->data[$model->alias][$field])) {
@@ -139,7 +139,7 @@ class UploadableBehavior extends ModelBehavior {
 	* @access public
 	* @return void
 	*/
-	public function beforeDelete($model) {
+	public function beforeDelete(Model $model, $cascade = true) {
 		$fields = array();
 		foreach ($this->settings[$model->alias] as $field => $thumb) {
 			if (is_numeric($field)) {
@@ -164,7 +164,7 @@ class UploadableBehavior extends ModelBehavior {
 	* @access public
 	* @return void
 	*/
-	public function afterSave($model, $created) {
+	public function afterSave(Model $model, $created) {
 		if (!$created) {
 			$this->_delete($model);
 		}
@@ -177,7 +177,7 @@ class UploadableBehavior extends ModelBehavior {
 	* @access public
 	* @return void
 	*/
-	public function afterDelete($model) {
+	public function afterDelete(Model $model) {
 		$this->_delete($model);
 	}
 
@@ -187,7 +187,7 @@ class UploadableBehavior extends ModelBehavior {
 	 * @access protected
 	 * @return void
 	 */
-	protected function _delete($model) {
+	protected function _delete(Model $model) {
 		if (!empty($this->_toDelete[$model->alias])) {
 			$Upload = $this->_uploadInstance();
 			foreach ($this->_toDelete[$model->alias] as $id) {
