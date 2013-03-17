@@ -447,6 +447,11 @@ class UploadableBehavior extends ModelBehavior {
      * @return void
      */
     public function validateIsImage($model, $value) {
+        // validate true if file not uploaded
+        if (!$this->validateFileRequired($model, $value)) {
+            return true;
+        }
+
         $field = current($value);
         return $this->_isImageType($field['type']);
     }
