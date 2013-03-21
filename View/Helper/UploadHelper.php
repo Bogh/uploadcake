@@ -43,8 +43,7 @@ class UploadHelper extends AppHelper {
                 $options['url'] = $this->uri($options['url'], null, true);
             }
         }
-
-        $image = $this->Html->image($this->uri($id, $name, true), $options);
+        $image = $this->Html->image($this->uri($id, $name, true));
         return  $image;
     }
 
