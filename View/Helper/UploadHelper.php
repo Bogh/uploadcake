@@ -21,6 +21,9 @@ class UploadHelper extends AppHelper {
      * @return string
      */
     public function link($title, $id, $name = null, $options = array(), $extra = array()) {
+        if (empty($id)) {
+            return '';
+        }
         return $this->Html->link($title, $this->uri($id, $name, true, false, $extra), $options);
     }
 
@@ -36,6 +39,9 @@ class UploadHelper extends AppHelper {
      * @return string
      */
     public function image($id, $name = null, $options = array()) {
+        if (empty($id)) {
+            return '';
+        }
         if (isset($options['url'])) {
             if ($options['url'] === true) {
                 $options['url'] = $this->uri($id, $name, true);
@@ -58,6 +64,9 @@ class UploadHelper extends AppHelper {
      * @return mixed Array daca $array e True, string daca e false
      */
     public function uri($id, $name = null, $array = false, $full = false, $extra = array()) {
+        if (empty($id)) {
+            return '';
+        }
         $url = Hash::merge(array(
             'plugin' => 'upload',
             'controller' => 'uploads',
