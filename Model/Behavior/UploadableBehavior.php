@@ -390,11 +390,11 @@ class UploadableBehavior extends ModelBehavior {
     protected function _imagefunc($type) {
         switch ($type) {
             case 'image/png':
-            return array('imagecreatefrompng', 'imagepng');
+                return array('imagecreatefrompng', 'imagepng');
             case 'image/gif':
-            return array('imagecreatefromgif', 'imagegif');
+                return array('imagecreatefromgif', 'imagegif');
             default:
-            return array('imagecreatefromjpeg', 'imagejpeg');
+                return array('imagecreatefromjpeg', 'imagejpeg');
         }
     }
 
@@ -431,9 +431,11 @@ class UploadableBehavior extends ModelBehavior {
     * @access public
     * @return void
     */
-    public function validateFileSize($model, $value, $size = null) {
+    public function validateFileSize($model, $value) {
         $field = current($value);
-        if ($field['error'] === UPLOAD_ERR_OK && $size && $field['size'] > $size) {
+        if ($field['error'] == UPLOAD_ERR_INI_SIZE) {
+            debug('dafuq');
+            debug(UPLOAD_ERR_INI_SIZE);
             return false;
         }
         return true;
@@ -451,7 +453,6 @@ class UploadableBehavior extends ModelBehavior {
         if (!$this->validateFileRequired($model, $value)) {
             return true;
         }
-
         $field = current($value);
         return $this->_isImageType($field['type']);
     }
