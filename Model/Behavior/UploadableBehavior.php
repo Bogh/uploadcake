@@ -434,8 +434,6 @@ class UploadableBehavior extends ModelBehavior {
     public function validateFileSize($model, $value) {
         $field = current($value);
         if ($field['error'] == UPLOAD_ERR_INI_SIZE) {
-            debug('dafuq');
-            debug(UPLOAD_ERR_INI_SIZE);
             return false;
         }
         return true;
