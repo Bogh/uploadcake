@@ -13,6 +13,9 @@ class UploadSchema extends CakeSchema {
 		'upload_id' => array('type' => 'integer', 'null' => false, 'default' => null, 'key' => 'index'),
 		'name' => array('type' => 'string', 'null' => true, 'default' => null, 'length' => 10, 'collate' => 'latin1_swedish_ci', 'charset' => 'latin1'),
 		'path' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'latin1_swedish_ci', 'charset' => 'latin1'),
+		'width' => array('type' => 'integer', 'null' => true, 'default' => null),
+		'height' => array('type' => 'integer', 'null' => true, 'default' => null),
+		'crop' => array('type' => 'boolean', 'null' => true, 'default' => null),
 		'indexes' => array(
 			'PRIMARY' => array('column' => 'id', 'unique' => 1),
 			'IDX_SEARCH' => array('column' => array('upload_id', 'name'), 'unique' => 0),

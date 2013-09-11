@@ -102,7 +102,7 @@ class UploadableBehavior extends ModelBehavior {
     * @access public
     * @return void
     */
-    public function beforeSave(Model $model) {
+    public function beforeSave(Model $model, $options = array()) {
         foreach ($this->settings[$model->alias] as $field => $settings) {
             if (!isset($model->data[$model->alias][$field])
                 || !is_array($model->data[$model->alias][$field])) {
