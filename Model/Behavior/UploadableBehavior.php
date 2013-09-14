@@ -1,30 +1,8 @@
 <?php
 
-App::uses('Folder', 'Utility');
-App::uses('File', 'Utility');
+App::uses('Up', 'Upload.Utility');
 
 class UploadableBehavior extends ModelBehavior {
-
-    /**
-     * _imageTypes
-     *
-     * @var array
-     * @access protected
-     */
-    protected $_imageTypes = array(
-        'image/jpg',
-        'image/png',
-        'image/jpeg',
-        'image/gif'
-    );
-
-    /**
-     * _uploadDir
-     *
-     * @var mixed
-     * @access protected
-     */
-    protected $_uploadDir = null;
 
     /**
      * _toDelete
@@ -49,20 +27,6 @@ class UploadableBehavior extends ModelBehavior {
      * @access public
      */
     public $thumbs = array();
-
-    /**
-    * __construct
-    *
-    * @access public
-    * @return void
-    */
-    public function __construct() {
-        if (!$this->_uploadDir = Configure::read('Upload.dir')) {
-            $this->_uploadDir = APP . 'Uploads' . DS;
-        }
-
-        parent::__construct();
-    }
 
     /**
     * setup
@@ -117,11 +81,8 @@ class UploadableBehavior extends ModelBehavior {
                     $this->_toDelete[$model->alias][] = $model->field($field);
                     $model->recursive = $recursive;
                 }
-                $value = $this->_upload(
-                    $data,
-                    $this->thumbs[$model->alias][$field],
-                    $this->settings[$model->alias][$field]
-                );
+                // do upload
+                $value = $this->_upload($data, $this->settings[$model->alias][$field]);
             } elseif ($model->exists()) {
                 $value = $model->field($field);
             } else {
@@ -217,46 +178,52 @@ class UploadableBehavior extends ModelBehavior {
      * _upload
      *
      * @param mixed $data
-     * @param mixed $thumbs
      * @param mixed $settings
      * @access protected
      * @return void
      */
-    protected function _upload($data, $thumbs, $settings) {
-        $name = $type = $size = $image = $path = null;
+    protected function _upload($data, $settings) {
+        $name = $type = $size = $isImage = $path = null;
         $paths = array();
         extract($settings, EXTR_OVERWRITE);
         extract($data, EXTR_OVERWRITE);
-        $image = $this->_isImageType($type);
+        $isImage = Up::isImageType($type);
 
-        if (!$image || $keepOriginal) {
+        if (!$isImage || $keepOriginal) {
             if (!$path = $this->_moveFile($data['tmp_name'])) {
                 return null;
             }
         }
 
-        if ($image && !empty($thumbs)) {
-            $func = $this->_imagefunc($type);
-            if ($keepOriginal && $image && $path) {
-                $img = $func[0]($this->_uploadDir . $path['path']);
-            } else {
-                $img = $func[0]($tmp_name);
-            }
+        // if ($isImage && !empty($thumbs)) {
+        //     $func = $this->_imagefunc($type);
+        //     if ($keepOriginal && $isImage && $path) {
+        //         $img = $func[0](Up::uploadDir() . $path['path']);
+        //     } else {
+        //         $img = $func[0]($tmp_name);
+        //     }
 
-            foreach ($thumbs as $thumb) {
-                if ($t = $this->_thumb($img, $func, $thumb)) {
-                    $paths[] = $t;
-                }
-            }
+            // foreach ($thumbs as $thumb) {
+            //     if ($t = $this->_thumb($img, $func, $thumb)) {
+            //         $paths[] = $t;
+            //     }
+            // }
+        // }
+
+        if ($isImage) {
+            $sizes = getimagesize(Up::uploadDir() . $path['path']);
+            $path = Hash::merge($path, array(
+                'width' => $sizes[0],
+                'height' => $sizes[1],
+            ));
         }
-
-        if ($path && (!$image || $keepOriginal)) {
+        if ($path && (!$isImage || $keepOriginal)) {
             $paths[] = $path;
         }
 
-        if (isset($img)) {
-            imagedestroy($img);
-        }
+        // if (isset($img)) {
+        //     imagedestroy($img);
+        // }
 
         $upload = array(
             'Upload' => compact('name', 'type', 'size', 'image'),
@@ -272,17 +239,6 @@ class UploadableBehavior extends ModelBehavior {
     }
 
     /**
-     * _isImageType
-     *
-     * @param mixed $type
-     * @access protected
-     * @return void
-     */
-    protected function _isImageType($type) {
-        return in_array($type, $this->_imageTypes);
-    }
-
-    /**
      * _moveFile
      *
      * @param mixed $from
@@ -290,9 +246,9 @@ class UploadableBehavior extends ModelBehavior {
      * @return void
      */
     protected function _moveFile($from) {
-        $path = $this->_path();
+        $path = Up::path();
 
-        $to = $this->_uploadDir . $path;
+        $to = Up::uploadDir() . $path;
         if (move_uploaded_file($from, $to)) {
             chmod($to, 0777);
             return array(
@@ -302,100 +258,6 @@ class UploadableBehavior extends ModelBehavior {
         }
 
         return false;
-    }
-
-    /**
-     * _path
-     *
-     * @access protected
-     * @return void
-     */
-    protected function _path() {
-        $dir = $this->_folder();
-        $file = tempnam($this->_uploadDir . $dir, 'up_');
-        return $dir . DS . basename($file);
-    }
-
-    protected function _folder() {
-        $dir = date('Y' . DS . 'm' . DS . 'd');
-        $folder = new Folder($this->_uploadDir . $dir, true, 0777);
-        return $dir;
-    }
-
-    /**
-     * _thumb
-     *
-     * @param mixed $img
-     * @param mixed $func
-     * @param mixed $thumb
-     * @access protected
-     * @return void
-     */
-    protected function _thumb($img, $func, $thumb) {
-        $path = $this->_path();
-        $name = $thumb[0];
-
-        $size = array(
-            imagesx($img),
-            imagesy($img)
-        );
-
-        $xr = $size[0] / $thumb[1];
-        $yr = $size[1] / $thumb[2];
-
-        $crop = isset($thumb[3]) ? $thumb[3] : false;
-
-        $src = array(0, 0);
-        if ($xr > $yr) {
-            $w = $thumb[1];
-            if ($crop) {
-                $h = $thumb[2];
-                $diff = ($size[0] - $w) / $yr;
-                $src[0] += $diff;
-                $size[0] -= $diff;
-            } else {
-                $h = $size[1] / $xr;
-            }
-        } else {
-            $h = $thumb[2];
-            if ($crop) {
-                $w = $thumb[1];
-                $diff = ($size[1] - $h) / $xr;
-                $src[1] += $diff;
-                $size[1] -= $diff;
-            } else {
-                $w = $size[0] / $yr;
-            }
-        }
-
-        $tImg = imagecreatetruecolor($w, $h);
-        imagecopyresampled($tImg, $img, 0, 0, $src[0], $src[1], $w, $h, $size[0], $size[1]);
-
-        if ($func[1]($tImg, $this->_uploadDir . $path)) {
-            $return = compact('name', 'path');
-        }
-
-        imagedestroy($tImg);
-
-        return $return;
-    }
-
-    /**
-     * _imagefunc
-     *
-     * @param mixed $type
-     * @access protected
-     * @return void
-     */
-    protected function _imagefunc($type) {
-        switch ($type) {
-            case 'image/png':
-                return array('imagecreatefrompng', 'imagepng');
-            case 'image/gif':
-                return array('imagecreatefromgif', 'imagegif');
-            default:
-                return array('imagecreatefromjpeg', 'imagejpeg');
-        }
     }
 
     /**
@@ -452,7 +314,7 @@ class UploadableBehavior extends ModelBehavior {
             return true;
         }
         $field = current($value);
-        return $this->_isImageType($field['type']);
+        return Up::isImageType($field['type']);
     }
 
 }

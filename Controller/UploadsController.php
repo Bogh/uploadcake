@@ -22,7 +22,7 @@ class UploadsController extends UploadAppController {
         }
 
         $upload = $this->Upload->getUpload($id, $name);
-        if (empty($upload) || empty($upload['UploadPath'])) {
+        if (empty($upload)) {
             throw new NotFoundException();
         }
 
