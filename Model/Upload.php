@@ -36,7 +36,11 @@ class Upload extends UploadAppModel {
      */
     public function getUpload($id, $name = null) {
         $this->id = $id;
-        if (!Configure::check("Upload.thumbs.{$name}") || !$this->exists()) {
+
+        if (!is_null($name) && !Configure::check("Upload.thumbs.{$name}")) {
+            return null;
+        }
+        if (!$this->exists()) {
             return null;
         }
 
