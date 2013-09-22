@@ -87,12 +87,12 @@ class Upload extends UploadAppModel {
         $func = Up::imagefunc($u['type']);
         $img = $func[0](Up::uploadDir() . $uPath);
 
-        $thumb = Hash::merge(array(
+        $thumb = Configure::read("Upload.thumbs.{$name}") + array(
             100, 100, 0
-        ), Configure::read("Upload.thumbs.{$name}"));
+        );
 
         $size = array(imagesx($img), imagesy($img));
-        // var_dump($thumb); die;
+
         $xr = $size[0] / $thumb[0];
         $yr = $size[1] / $thumb[1];
 
@@ -100,9 +100,9 @@ class Upload extends UploadAppModel {
 
         $src = array(0, 0);
         if ($xr > $yr) {
-            $w = $thumb[1];
+            $w = $thumb[0];
             if ($crop) {
-                $h = $thumb[2];
+                $h = $thumb[1];
                 $diff = ($size[0] - $w) / $yr;
                 $src[0] += $diff;
                 $size[0] -= $diff;
@@ -110,9 +110,9 @@ class Upload extends UploadAppModel {
                 $h = $size[1] / $xr;
             }
         } else {
-            $h = $thumb[2];
+            $h = $thumb[1];
             if ($crop) {
-                $w = $thumb[1];
+                $w = $thumb[0];
                 $diff = ($size[1] - $h) / $xr;
                 $src[1] += $diff;
                 $size[1] -= $diff;
