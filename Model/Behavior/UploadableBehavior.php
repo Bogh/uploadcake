@@ -21,14 +21,6 @@ class UploadableBehavior extends ModelBehavior {
     protected $_Upload = null;
 
     /**
-     * thumbs
-     *
-     * @var array
-     * @access public
-     */
-    public $thumbs = array();
-
-    /**
     * setup
     *
     * @param mixed $model
@@ -52,7 +44,6 @@ class UploadableBehavior extends ModelBehavior {
             }
             $_settings = array_merge($defaults, $settings);
 
-            $this->thumbs[$model->alias][$field] = array_diff_key($settings, $defaults);
             $this->settings[$model->alias][$field] = array_intersect_key($_settings, $defaults);
         }
 
@@ -90,6 +81,7 @@ class UploadableBehavior extends ModelBehavior {
             }
             $model->data[$model->alias][$field] = $value;
         }
+
         return true;
     }
 
